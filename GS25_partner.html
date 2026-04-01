@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GS25 기준외 품의금액 현황</title>
+<meta name="theme-color" content="#0F4C9A">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif}
+body{background:#F3F4F6;min-height:100vh}
+.hd{background:#0F4C9A;padding:16px;position:sticky;top:0;z-index:10}
+.hd-title{color:#fff;font-size:16px;font-weight:800;letter-spacing:-.3px}
+.hd-sub{color:rgba(255,255,255,.65);font-size:12px;margin-top:3px}
+.hd-row2{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px}
+.sum-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;text-align:center}
+.sum-badge-n{color:#fff;font-size:18px;font-weight:800;line-height:1}
+.sum-badge-l{color:rgba(255,255,255,.65);font-size:10px;margin-top:2px}
+.wrap{padding:12px 12px 40px;max-width:600px;margin:0 auto}
+
+/* 요약 테이블 */
+.summary-box{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;margin-bottom:12px}
+.summary-hd{background:#1E3A5F;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.summary-hd-title{color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px}
+.summary-hd-total{color:#fff;font-size:14px;font-weight:800}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid #F3F4F6;cursor:pointer;transition:background .1s}
+.summary-row:last-child{border-bottom:none}
+.summary-row:hover{background:#F8FAFF}
+.summary-row.closed-row{opacity:.6}
+.s-no{font-size:11px;font-weight:700;color:#9CA3AF;width:24px;flex-shrink:0}
+.s-name{font-size:13px;font-weight:700;color:#111827;flex:1;padding:0 8px}
+.s-name.closed-name{text-decoration:line-through;color:#6B7280}
+.s-amt{font-size:13px;font-weight:800;color:#0F4C9A;white-space:nowrap}
+.s-amt.zero{color:#9CA3AF;font-weight:500}
+.s-chevron{font-size:10px;color:#9CA3AF;margin-left:6px}
+
+/* 상세 카드 */
+.detail-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;margin-bottom:10px;overflow:hidden;display:none}
+.detail-card.open{display:block}
+.detail-card-hd{padding:14px 16px;display:flex;align-items:center;gap:10px}
+.d-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;flex-shrink:0}
+.d-name{font-size:15px;font-weight:800;color:#111827;letter-spacing:-.3px}
+.d-meta{font-size:11px;color:#6B7280;margin-top:2px}
+.d-body{padding:0 16px 14px}
+.d-items{border:1px solid #F3F4F6;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.d-item{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid #F3F4F6}
+.d-item:last-child{border-bottom:none}
+.d-item-label{font-size:13px;color:#374151;flex:1;padding-right:12px}
+.d-item-amt{font-size:13px;font-weight:700;color:#111827;white-space:nowrap}
+.d-total{display:flex;justify-content:space-between;align-items:center;background:#EFF6FF;border-radius:8px;padding:10px 12px}
+.d-total-label{font-size:13px;font-weight:700;color:#1E40AF}
+.d-total-amt{font-size:18px;font-weight:800;color:#0F4C9A;letter-spacing:-.5px}
+.no-amt{font-size:13px;color:#9CA3AF;padding:12px 0;text-align:center}
+.closed-badge{background:#1E3A5F;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.active-badge{background:#DCFCE7;color:#166534;border:1px solid #BBF7D0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div class="hd-title">GS25 기준외 품의금액 현황</div>
+  <div class="hd-sub">2026년 3월 오픈 점포 · 담당: 백운호</div>
+  <div class="hd-row2">
+    <div class="sum-badge"><div class="sum-badge-n" id="total-amt">-</div><div class="sum-badge-l">전체 합계</div></div>
+    <div class="sum-badge"><div class="sum-badge-n" id="store-cnt">21</div><div class="sum-badge-l">전체 점포</div></div>
+    <div class="sum-badge"><div class="sum-badge-n" id="amt-cnt">-</div><div class="sum-badge-l">금액 입력</div></div>
+    <div class="sum-badge"><div class="sum-badge-n" id="no-amt-cnt">-</div><div class="sum-badge-l">미입력</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="summary-box">
+    <div class="summary-hd">
+      <span class="summary-hd-title">점포별 기준외 금액 요약</span>
+      <span class="summary-hd-total" id="summary-total">-</span>
+    </div>
+    <div id="summary-list"></div>
+  </div>
+  <div id="detail-list"></div>
+</div>
+
+<script>
+const STORES=[
+  {no:1,name:"세종카페거리",start:"2026/01/20",end:"2026/01/28",closed:true,
+   items:[{l:"무허가간판",a:399000},{l:"실외기갤러리",a:1200000},{l:"외부테라스",a:2303000},{l:"외부어닝",a:1540000}]},
+  {no:2,name:"광주양산센터",start:"2026/02/27",end:"2026/03/10",closed:true,
+   items:[{l:"어닝천막",a:1299000},{l:"외부등",a:158000}]},
+  {no:3,name:"뉴한서대스타",start:"2026/03/03",end:"2026/03/11",closed:true,
+   items:[{l:"데크철거 및 설치",a:6400000},{l:"측면간판(무허가)",a:2400000}]},
+  {no:4,name:"아산음봉신휴",start:"2026/03/04",end:"2026/03/13",closed:true,
+   items:[{l:"에코장비 교체요청 슬림형>일반형 (단가 260천원)",a:2000000},{l:"상부장",a:991000},{l:"택배기전열 재설치",a:105000},{l:"DVR 3대 추가",a:130000},{l:"원목테이블",a:179000},{l:"스탠딩간판",a:103000}]},
+  {no:5,name:"문지프리미엄",start:"2026/03/03",end:"2026/03/12",closed:true,
+   items:[{l:"어닝천막",a:2074000},{l:"외부등",a:267000},{l:"외부전열",a:150000},{l:"겸용평대",a:1720000}]},
+  {no:6,name:"유성포레나",start:"2026/03/04",end:"2026/03/27",closed:true,
+   items:[{l:"어닝천막",a:400000},{l:"무허가 간판 및 백판넬설치",a:1058000}]},
+  {no:7,name:"순천신대본",start:"2026/03/08",end:"2026/03/20",closed:true,
+   items:[{l:"조적벽 철거",a:11278000},{l:"출입문 계단",a:1234000},{l:"어닝 신설",a:1826000}]},
+  {no:8,name:"LG기술연구원구동",start:"2026/03/09",end:"2026/03/19",closed:true,items:[]},
+  {no:9,name:"정읍수성주공",start:"2026/03/11",end:"2026/03/23",closed:true,
+   items:[{l:"돌출간판",a:643000},{l:"무허가창고 설치",a:700000}]},
+  {no:10,name:"광주아펠리스",start:"2026/03/12",end:"2026/03/21",closed:true,items:[]},
+  {no:11,name:"군산골드스타",start:"2026/03/11",end:"2026/03/26",closed:true,
+   items:[{l:"부데크 보수",a:1077000},{l:"노후도장/외부등기구",a:2083000},{l:"측면돌출간판",a:817000}]},
+  {no:12,name:"예산내포엘리움",start:"2026/03/16",end:"2026/03/25",closed:true,
+   items:[{l:"어닝천막 및 비가림막",a:2475000},{l:"소방수신기 이설",a:750000}]},
+  {no:13,name:"천안신부중앙",start:"2026/03/14",end:"2026/03/25",closed:true,
+   items:[{l:"외부데크 철거",a:1050000},{l:"64지구내 전열 및 앵글설치",a:500000}]},
+  {no:14,name:"서천장항",start:"2026/03/15",end:"2026/03/25",closed:true,
+   items:[{l:"어닝천막",a:1058000},{l:"외부등 및 전열",a:148000},{l:"WIC1D 추가",a:1400000},{l:"시식강화",a:1400000}]},
+  {no:15,name:"세종새롬하늘",start:"2026/03/21",end:"2026/03/30",closed:true,
+   items:[{l:"간판백판넬",a:556000},{l:"추가 체크판슬로프",a:241000}]},
+  {no:16,name:"옥계프리미엄",start:"2026/03/16",end:"2026/03/25",closed:true,
+   items:[{l:"어닝천막",a:792000},{l:"외부등 및 외부전열",a:450000},{l:"시식강화",a:1505000},{l:"냉장겸용",a:1720000}]},
+  {no:17,name:"아산모종한성펠",start:"2026/03/17",end:"2026/03/26",closed:true,
+   items:[{l:"전면어닝",a:1661000},{l:"전면데크",a:1106000},{l:"간판백판",a:1286000},{l:"외부등 외",a:1160000}]},
+  {no:18,name:"군산아너스빌",start:"2026/03/21",end:"2026/03/30",closed:true,
+   items:[{l:"어닝천막 및 외부등 설치",a:1500000},{l:"백판간판",a:1036000},{l:"RIC 추가",a:850000}]},
+  {no:19,name:"광주우산한국",start:"2026/03/16",end:"2026/03/26",closed:true,
+   items:[{l:"어닝",a:921000},{l:"외부등",a:121000}]},
+  {no:20,name:"화순모아엘가",start:"2026/03/21",end:"2026/03/30",closed:true,items:[]},
+  {no:21,name:"계룡산단",start:"2026/03/22",end:"2026/03/30",closed:true,
+   items:[{l:"지주간판",a:2167000},{l:"유도간판",a:396000},{l:"배관",a:250000}]},
+];
+
+const COLORS=["#0F4C9A","#0D7377","#7C3AED","#BE185D","#B45309","#0F766E","#1D4ED8","#92400E","#065F46","#831843","#1E3A5F","#3730A3","#7F1D1D","#0369A1","#4D7C0F","#6D28D9","#0F4C9A","#0D7377","#7C3AED","#BE185D","#B45309"];
+
+function comma(n){return n.toLocaleString("ko-KR");}
+function total(s){return s.items.reduce((a,i)=>a+i.a,0);}
+
+const grandTotal=STORES.reduce((a,s)=>a+total(s),0);
+const amtCnt=STORES.filter(s=>s.items.length>0).length;
+const noAmtCnt=STORES.filter(s=>s.items.length===0).length;
+
+document.getElementById("total-amt").textContent=Math.round(grandTotal/1000).toLocaleString()+"천원";
+document.getElementById("amt-cnt").textContent=amtCnt;
+document.getElementById("no-amt-cnt").textContent=noAmtCnt;
+document.getElementById("summary-total").textContent=comma(grandTotal)+"원";
+
+// 요약 목록
+let sumHtml="";
+STORES.forEach((s,i)=>{
+  const t=total(s);
+  sumHtml+=`<div class="summary-row${s.closed?" closed-row":""}" onclick="toggleDetail(${i})">
+    <span class="s-no">${String(s.no).padStart(2,"0")}</span>
+    <span class="s-name${s.closed?" closed-name":""}">${s.name}${s.closed?'<span class="closed-badge">완료</span>':''}</span>
+    <span class="s-amt${t===0?" zero"}">${t>0?comma(t)+"원":"미입력"}</span>
+    <span class="s-chevron" id="chv-${i}">▼</span>
+  </div>`;
+});
+document.getElementById("summary-list").innerHTML=sumHtml;
+
+// 상세 카드
+let detHtml="";
+STORES.forEach((s,i)=>{
+  const t=total(s);
+  const col=COLORS[i%COLORS.length];
+  let itemsHtml=s.items.length===0
+    ?`<div class="no-amt">기준외 품의금액 없음</div>`
+    :`<div class="d-items">${s.items.map(it=>`<div class="d-item"><span class="d-item-label">${it.l}</span><span class="d-item-amt">${comma(it.a)}원</span></div>`).join("")}</div>
+     <div class="d-total"><span class="d-total-label">합 계</span><span class="d-total-amt">${comma(t)}원</span></div>`;
+  detHtml+=`<div class="detail-card" id="det-${i}">
+    <div class="detail-card-hd">
+      <div class="d-icon" style="background:${col}">${String(s.no).padStart(2,"0")}</div>
+      <div>
+        <div class="d-name">${s.name}<span class="${s.closed?"closed-badge":"active-badge"}">${s.closed?"마감완료":"진행중"}</span></div>
+        <div class="d-meta">착공 ${s.start} → 준공 ${s.end}</div>
+      </div>
+    </div>
+    <div class="d-body">${itemsHtml}</div>
+  </div>`;
+});
+document.getElementById("detail-list").innerHTML=detHtml;
+
+function toggleDetail(i){
+  const card=document.getElementById("det-"+i);
+  const chv=document.getElementById("chv-"+i);
+  const isOpen=card.classList.contains("open");
+  card.classList.toggle("open",!isOpen);
+  chv.textContent=isOpen?"▼":"▲";
+  if(!isOpen) card.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+</script>
+</body>
+</html>
